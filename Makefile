@@ -1,5 +1,5 @@
 NAME = pipex
-CFLAGS = -Wall -Werror -Wextra -fsanitize=address -fsanitize=leak
+CFLAGS = -Wall -Werror -Wextra
 SRCS =libft/ft_strlen.c \
         libft/ft_memset.c \
         libft/ft_bzero.c \
@@ -20,7 +20,7 @@ FT = $(PIPE:.c=.o)
 all: $(NAME)
 
 $(NAME): $(OBJS) $(FT)
-	$(CC) -o $(NAME) $(OBJS) $(FT) -fsanitize=address -fsanitize=leak
+	$(CC) -o $(NAME) $(OBJS) $(FT)
 
 clean:
 	rm -f $(OBJS) $(FT)

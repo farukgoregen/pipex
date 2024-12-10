@@ -6,7 +6,7 @@
 /*   By: omgorege <omgorege@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 15:47:03 by omgorege          #+#    #+#             */
-/*   Updated: 2024/12/05 15:29:31 by omgorege         ###   ########.fr       */
+/*   Updated: 2024/12/09 12:27:13 by omgorege         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,20 @@ char	*ft_path(char **envp)
 	while (ft_strnstr(envp[i], "PATH", 4) == 0)
 		i++;
 	path = ft_substr(envp[i], 5, ft_strlen(envp[i]) - 5);
-	if (!path)
-	{
-		return (NULL);
-	}
 	return (path);
+}
+
+void	ft_free(char **str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i] != 0)
+	{
+		free(str[i]);
+		i++;
+	}
+	free(str);
 }
 
 char	*pathc(char *cmd, char **envp)
@@ -34,28 +43,31 @@ char	*pathc(char *cmd, char **envp)
 	char	**path;
 	char	*arg;
 	char	*str;
+	char	*tmp;
 
-	path = ft_split(ft_path(envp), ':');
-	if (!path)
-		return (NULL);
-	i = 0;
-	while (path[i])
+	tmp = ft_path(envp);
+	path = ft_split(tmp, ':');
+	free(tmp);
+	i = -1;
+	while (path[++i])
 	{
 		arg = ft_strjoin(path[i], "/");
 		str = ft_strjoin(arg, cmd);
 		free(arg);
 		if (access(str, F_OK) == 0)
+		{
+			ft_free(path);
 			return (str);
-		i++;
+		}
+		free(str);
 	}
-	i = 0;
-	free(str);
+	ft_free(path);
 	return (NULL);
 }
 
-void	error(void)
+void	error(char *hat)
 {
-	perror("ERROR");
+	perror(hat);
 	exit(1);
 }
 
@@ -63,19 +75,17 @@ void	exec(char **envp, char *av)
 {
 	char	**cmd;
 	char	*path;
-	int		i;
 
-	i = -1;
 	cmd = ft_split(av, ' ');
 	path = pathc(cmd[0], envp);
 	if (!path)
 	{
-		while (cmd[i++])
-			free(cmd);
-		free(cmd);
-		error();
+		ft_free(cmd);
+		error(ERR_CMD);
 	}
 	if (execve(path, cmd, envp) == -1)
-		error();
+	{
+		error(ERR_PRC);
+	}
 	free(path);
 }
